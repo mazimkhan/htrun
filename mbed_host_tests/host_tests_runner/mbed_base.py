@@ -250,11 +250,7 @@ class Mbed:
         """
         # Flush serials to get only input after reset
         self.flush()
-        if self.options.forced_reset_type:
-            reset_method = self.options.forced_reset_type
-        else:
-            reset_method = 'default'
-        result = ht_plugins.call_plugin('ResetMethod', reset_method,
+        result = ht_plugins.call_plugin('ResetMethod', self.options.forced_reset_type,
                                         serial=self.serial, disk=self.disk,
                                         image_path=self.image_path)
         # Give time to wait for the image loading

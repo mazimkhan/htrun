@@ -554,8 +554,11 @@ def init_host_test_cli_params():
 
     reset_methods_str = "Plugin support: " + ', '.join(host_tests_plugins.get_plugin_caps('ResetMethod'))
 
+    reset_type_default = 'default_mac' if sys.platform == 'mac' else 'default'
     parser.add_option("-r", "--reset",
                       dest="forced_reset_type",
+                      type="str",
+                      default="default",
                       help="Forces different type of reset. " + reset_methods_str)
 
     parser.add_option("-C", "--program_cycle_s",
