@@ -17,7 +17,10 @@ limitations under the License.
 Author: Przemyslaw Wirkus <Przemyslaw.Wirkus@arm.com>
 """
 
+import os
+import time
 import json
+import mbed_lstools
 from time import sleep
 from mbed_host_tests import DEFAULT_BAUD_RATE
 import mbed_host_tests.host_tests_plugins as ht_plugins
@@ -93,9 +96,36 @@ class Mbed:
         if not port:
             port = self.port
 
+        mbed_htm_fd = None
+        check_remount = copy_method in [None, 'shell']
+        if check_remount:
+            # Obtain a file handle to disk/mbed.htm before flashing
+            mbed_htm_fd = open(os.path.join(disk, 'mbed.htm'), 'r')
+
         # Call proper copy method
         result = self.copy_image_raw(image_path, disk, copy_method, port)
+
+        if check_remount:
+            print 'MBED: Waiting for device to disconnect and connect for 60 sec'
+            try:
+                for i in range (60):
+                    time.sleep(1)
+                    mbed_htm_fd.read(1)
+                    mbed_htm_fd.seek(0)
+            except IOError, e:
+                print 'MBED: Board disconnected @%s' % time.ctime()
+
         sleep(self.program_cycle_s)
+
+        if check_remount:
+            for i in range (60):
+                mbeds = mbed_lstools.create().list_mbeds_by_targetid()
+                if self.target_id in mbeds and \
+                        mbeds[self.target_id]['mount_point'] and \
+                        mbeds[self.target_id]['serial_port']:
+                    print "MBED: Board connected @%s" % time.ctime()
+                    break
+                time.sleep(1)
         return result
 
     def copy_image_raw(self, image_path=None, disk=None, copy_method=None, port=None):
