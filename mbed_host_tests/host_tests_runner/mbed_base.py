@@ -112,6 +112,7 @@ class Mbed:
                     time.sleep(1)
                     mbed_htm_fd.read(1)
                     mbed_htm_fd.seek(0)
+                print 'MBED: Board did not disconnect!'
             except IOError, e:
                 print 'MBED: Board disconnected @%s' % time.ctime()
 
