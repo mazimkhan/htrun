@@ -121,29 +121,36 @@ class Mbed:
         sleep(self.program_cycle_s)
 
         if check_remount:
-            mbed = None
             for i in range (60):
                 mbeds = mbed_lstools.create().list_mbeds_by_targetid()
                 if self.target_id in mbeds and \
                         mbeds[self.target_id]['mount_point'] and \
                         mbeds[self.target_id]['serial_port']:
                     print "MBED: Board connected @%s" % time.ctime()
-                    mbed = mbeds[self.target_id]
                     break
                 time.sleep(1)
-            # Check for *.txt files in mbed drive
-            if mbed:
-                mbed_drive = mbed['mount_point']
-                files = os.listdir(mbed_drive)
-                print "MBED: Files in mbed drive %s:" % mbed_drive
-                print "\n".join(files)
-                for file in files:
-                    path = os.path.join(mbed_drive, file)
-                    if os.path.splitext(path)[1].lower() == '.txt':
-                        print "MBED: File %s" % path
-                        print "MBED: ============="
-                        with open(path, 'r') as f:
-                            print f.read(1000)
+
+        # Check for *.txt files in mbed drive
+        mbeds = mbed_lstools.create().list_mbeds_by_targetid()
+        if self.target_id in mbeds:
+            mbed = mbeds[self.target_id]
+            mbed_drive = mbed['mount_point']
+            files = os.listdir(mbed_drive)
+            print "MBED: Files in mbed drive %s:" % mbed_drive
+            print "\n".join(files)
+            assert_file = None
+            for file in files:
+                path = os.path.join(mbed_drive, file)
+                if os.path.splitext(path)[1].lower() == '.txt':
+                    print "MBED: File %s" % path
+                    print "MBED: ============="
+                    with open(path, 'r') as f:
+                        print f.read(1000)
+                    if file.lower() == 'assert.txt':
+                        assert_file = os.path.join(mbed_drive, file)
+            if assert_file:
+                os.remove(assert_file)
+                time.sleep(1)
 
         return result
 
