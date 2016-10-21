@@ -149,6 +149,7 @@ class Mbed:
                     if file.lower() == 'assert.txt':
                         assert_file = os.path.join(mbed_drive, file)
             if assert_file:
+                print "MBED: Removing %s" % assert_file
                 os.remove(assert_file)
                 time.sleep(1)
 
