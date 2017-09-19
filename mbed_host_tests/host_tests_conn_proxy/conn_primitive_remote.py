@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 from mbed_host_tests import DEFAULT_BAUD_RATE
 from mbed_host_tests.host_tests_conn_proxy.conn_primitive import ConnectorPrimitive
 
@@ -55,7 +56,9 @@ class RemoteConnectorPrimitive(ConnectorPrimitive):
         self.logger.prn_inf("remote resources initialization: remote(host=%s, port=%s)"% (self.grm_host, self.grm_port))
 
         # Connect to remote global resource manager
-        self.client = self.remote_module.create(host=self.grm_host, port=self.grm_port)
+        raas_logger = logging.getLogger("raas-client")
+        raas_logger.setLevel(logging.DEBUG)
+        self.client = self.remote_module.create(host=self.grm_host, port=self.grm_port, logger=raas_logger)
 
         # First get the resources
         resources = self.client.get_resources()
